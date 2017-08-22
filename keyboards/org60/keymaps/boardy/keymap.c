@@ -5,6 +5,81 @@
 enum keyboard_layers {
   _BASE,        // Base Layer
   _FUNCTION,    // Function Layer
+  _LIGHTING,    // Lighting Layer
+};
+
+enum custom_keys{
+  // Three Finger Salute - Sends Ctl-Alt-Del 
+  TFS = LCTL(LALT(KC_DEL)),
+};
+
+
+// Tap Dance Declarations
+enum tap_dance_actions{
+  TD_LAYER = 0,
+  TD_SHRUG = 1,
+};
+
+// Layer switching functions
+void layers_dance_finished (qk_tap_dance_state_t *state, void *user_data) {
+  uint8_t layer = biton32(layer_state);
+
+  switch(state->count) {
+    case 1:
+      switch(layer) {
+        case _FUNCTION:
+          layer_off(_FUNCTION);
+          break;
+        case _LIGHTING:
+          layer_off(_LIGHTING);
+          break;
+        default:
+          layer_on(_FUNCTION);
+          break;
+      }
+      break;
+    case 2:
+      layer_on(_LIGHTING);
+      break;
+    default:
+      break;
+  }
+}
+
+
+// TODO: Pulse functions
+void pulse_dance_finished(qk_tap_dance_state_t *state, void *user_data) {
+//  ergodox_right_led_1_off();
+  wait_ms(50);
+//  ergodox_right_led_2_off();
+  wait_ms(50);
+//  ergodox_right_led_3_off();
+}
+
+
+// Shrug functions
+// Acts as Shift, otherwise tap thrice for "::shrug::" ¯\_(ツ)_/¯
+void shrug_dance_each(qk_tap_dance_state_t *state, void *user_data) {
+  register_code (KC_LSFT);
+}
+void shrug_dance_finished(qk_tap_dance_state_t *state, void *user_data) {
+  switch(state->count) {
+    case 3:
+      SEND_STRING("::shrug::");
+      break;
+    default:
+      break;
+  }
+}
+void shrug_dance_reset(qk_tap_dance_state_t *state, void *user_data) {
+  unregister_code (KC_LSFT);
+}
+
+
+// Tap Dance Definitions
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [TD_LAYER] = ACTION_TAP_DANCE_FN (layers_dance_finished),
+  [TD_SHRUG] = ACTION_TAP_DANCE_FN_ADVANCED (shrug_dance_each, shrug_dance_finished, shrug_dance_reset),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -27,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |                   |        |        |        |        |        |        |        | <      | >      | ?      |░░░░░░|        |░░░░░░░░|
     |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-    | Shift             | Z      | X      | C      | V      | B      | N      | M      | ,      | .      | /      |░░░░░░| Up     |░░░░░░░░|
+    | Shift (TD_SHRUG)  | Z      | X      | C      | V      | B      | N      | M      | ,      | .      | /      |░░░░░░| Up     |░░░░░░░░|
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
@@ -50,11 +125,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-     KC_LSFT, KC_NO,     KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_NO, KC_UP,   KC_NO,   
+     TD(TD_SHRUG), KC_NO,KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_NO, KC_UP,   KC_NO,   
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
-     KC_LCTL,   KC_LGUI,   KC_LALT,   KC_SPC,                                                  F(0),      KC_NO, KC_LEFT, KC_DOWN, KC_RIGHT),
+     KC_LCTL,   KC_LGUI,   KC_LALT,   KC_SPC,                                                  TD(TD_LAYER),KC_NO,KC_LEFT,KC_DOWN, KC_RIGHT),
    //--------------------------------------------------------------------------------------------------------------------------------------'
 
 
@@ -67,20 +142,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     | Esc    | F1     | F2     | F3     | F4     | F5     | F6     | F7     | F8     | F9     | F10    | F11    | F12    | Delete          |
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |            |        |        |        |        |        |        |        |        |        |        |        |        |             |
-    |            |        |        |        | RGB    | RGB    | RGB    | RGB    |        |        |        |        |        |             |
-    | Reset      | 7      | 8      | 9      | Toggle | Mode   | Pwr+   | Pwr-   |        | Insert | Pause  | Home   | End    | Sleep       |
+    |            |        |        |        |        |        |        |        |        |        |        | Page   |        |             |
+    | Reset      | 7      | 8      | 9      |        |        |        |        | Insert |        | Home   | Up     | End    | TFS         |
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |               |        |        |        |        |        |        |        |        |        |        |        |                   |
-    |               |        |        |        | RGB    | RGB    | RGB    | RGB    |        |        | Page   | Page   |                   |
-    | Caps Lock     | 4      | 5      | 6      | Hue+   | Hue-   | Sat+   | Sat-   |        |        | Up     | Down   | Enter             |
+    |               |        |        |        |        |        |        |        |        |        |        | Page   |                   |
+    | Caps Lock     | 4      | 5      | 6      |        |        |        |        |        |        | Pause  | Down   | Enter             |
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-    |                   |        |        |        |        | Back   | Back   |        | Prev   | Next   |        |░░░░░░|        |░░░░░░░░|
-    | Shift             | 1      | 2      | 3      |        | Light+ | Light- |        | Track  | Track  |        |░░░░░░| Up     |░░░░░░░░|
+    |                   |        |        |        |        |        |        |        | Prev   | Next   |        |░░░░░░| Vol    |░░░░░░░░|
+    | Shift             | 1      | 2      | 3      |        |        |        |        | Track  | Track  |        |░░░░░░| Up     |░░░░░░░░|
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
-    |          |          |          |                                                        |          |░░░░░░|        |        |        |
-    | Ctrl     | Win      | Alt      | 0                                                      | Fn0      |░░░░░░| Mute   | Down   | Right  |
+    |          |          |          |                                                        |          |░░░░░░|        | Vol    |        |
+    | Ctrl     | Win      | Alt      | 0                                                      | FnO      |░░░░░░| Mute   | Down   | Right  |
     '--------------------------------------------------------------------------------------------------------------------------------------'
   */
 
@@ -91,19 +166,68 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
    //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
-     RESET,       KC_7,    KC_8,    KC_9,    RGB_TOG, RGB_MOD, RGB_VAI, RGB_VAD, KC_NO,   KC_INS,  KC_PAUS, KC_HOME, KC_END,  KC_SLEP,      
+     RESET,       KC_7,    KC_8,    KC_9,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_INS,  KC_NO,   KC_HOME, KC_PGUP, KC_END,  TFS,          
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //               |        |        |        |        |        |        |        |        |        |        |        |                   |
    //               |        |        |        |        |        |        |        |        |        |        |        |                   |
-     KC_CAPS,        KC_4,    KC_5,    KC_6,    RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, KC_NO,   KC_NO,   KC_PGUP, KC_PGDN, KC_NO, KC_ENT,      
+     KC_CAPS,        KC_4,    KC_5,    KC_6,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_PAUS, KC_PGDN, KC_NO, KC_ENT,      
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-     KC_LSFT, KC_NO,     KC_1,    KC_2,    KC_3,    KC_NO,   BL_INC,  BL_DEC,  KC_NO,   KC_MPRV, KC_MNXT, KC_NO,   KC_NO, KC_VOLU, KC_NO,   
+     KC_LSFT, KC_NO,     KC_1,    KC_2,    KC_3,    KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_MPRV, KC_MNXT, KC_NO,   KC_NO, KC_VOLU, KC_NO,   
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
-     KC_LCTL,   KC_LGUI,   KC_LALT,   KC_0,                                                    F(0),      KC_NO, KC_MUTE, KC_VOLD, KC_MPLY),
+     KC_LCTL,   KC_LGUI,   KC_LALT,   KC_0,                                                    TD(TD_LAYER),KC_NO,KC_MUTE,KC_VOLD, KC_MPLY),
+   //--------------------------------------------------------------------------------------------------------------------------------------'
+
+
+  [_LIGHTING] = KEYMAP(
+  /*
+    2: Lighting Layer
+    .--------------------------------------------------------------------------------------------------------------------------------------.
+    |        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
+    |        |        |        |        |        |        |        |        |        |        |        | Back   | Back   |                 |
+    |        |        |        |        |        |        |        |        |        |        |        | Light- | Light+ |                 |
+    |--------------------------------------------------------------------------------------------------------------------------------------|
+    |            |        |        |        |        |        |        |        |        |        |        |        |        |             |
+    |            |        |        |        | RGB    | RGB    | RGB    | RGB    |        |        |        |        |        |             |
+    |            |        |        |        | Toggle | Mode   | Pwr+   | Pwr-   |        |        |        |        |        |             |
+    |--------------------------------------------------------------------------------------------------------------------------------------|
+    |               |        |        |        |        |        |        |        |        |        |        |        |                   |
+    |               |        |        |        | RGB    | RGB    | RGB    | RGB    |        |        |        |        |                   |
+    |               |        |        |        | Hue+   | Hue-   | Sat+   | Sat-   |        |        |        |        |                   |
+    |--------------------------------------------------------------------------------------------------------------------------------------|
+    |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+    |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+    |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+    |--------------------------------------------------------------------------------------------------------------------------------------|
+    |          |          |          |                                                        |          |░░░░░░|        |        |        |
+    |          |          |          |                                                        |          |░░░░░░|        |        |        |
+    |          |          |          |                                                        | FnO      |░░░░░░|        |        |        |
+    '--------------------------------------------------------------------------------------------------------------------------------------'
+  */
+
+   //--------------------------------------------------------------------------------------------------------------------------------------.
+   //        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
+   //        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
+     KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   BL_INC,  BL_DEC,  KC_NO, KC_NO,     
+   //--------------------------------------------------------------------------------------------------------------------------------------|
+   //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
+   //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
+     KC_NO,       KC_NO,   KC_NO,   KC_NO,   RGB_TOG, RGB_MOD, RGB_VAI, RGB_VAD, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,          
+   //--------------------------------------------------------------------------------------------------------------------------------------|
+   //               |        |        |        |        |        |        |        |        |        |        |        |                   |
+   //               |        |        |        |        |        |        |        |        |        |        |        |                   |
+     KC_NO,          KC_NO,   KC_NO,   KC_NO,   RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO,       
+   //--------------------------------------------------------------------------------------------------------------------------------------|
+   //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+   //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+     KC_NO, KC_NO,       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO,   KC_NO,   
+   //--------------------------------------------------------------------------------------------------------------------------------------|
+   //          |          |          |                                                        |          |░░░░░░|        |        |        |
+   //          |          |          |                                                        |          |░░░░░░|        |        |        |
+     KC_NO,     KC_NO,     KC_NO,     KC_NO,                                                   TD(TD_LAYER),KC_NO,KC_NO,  KC_NO,   KC_NO),
    //--------------------------------------------------------------------------------------------------------------------------------------'
 
 };
