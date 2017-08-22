@@ -4,7 +4,7 @@
 #
 CONSOLE_ENABLE = no         # Enable debugging console
 COMMAND_ENABLE = no         # Commands for debug and configuration
-SLEEP_LED_ENABLE = yes      # 
+SLEEP_LED_ENABLE = yes      # Makes it so the LEDs don't flash when sleeping...
 TAP_DANCE_ENABLE = yes 		# Tap Dance skills
 UNICODE_ENABLE = no         # Unicode
 
