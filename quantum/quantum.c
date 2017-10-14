@@ -673,6 +673,9 @@ static const uint8_t backlight_pin = BACKLIGHT_PIN;
 #elif BACKLIGHT_PIN == B5
 #  define COM1x1 COM1A1
 #  define OCR1x  OCR1A
+//#elif BACKLIGHT_PIN == F5
+//#  define COM1x1 COM1A1
+//#  define OCR1x  OCR1A
 #else
 #  define NO_BACKLIGHT_CLOCK
 #endif

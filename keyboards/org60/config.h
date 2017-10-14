@@ -43,12 +43,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
 */
 #define MATRIX_ROW_PINS { D0, D1, D2, D3, D5 }
-#define MATRIX_COL_PINS { F0, F1, E6, C7, C6, B6, D4, B1, B7, B5, B4, D7, D6, B3 }
+#define MATRIX_COL_PINS { F0, F1, E6, C7, C6, B6, D4, B1, B7, F5, B4, D7, D6, B3 }
 #define UNUSED_PINS
 
 /* Backlight Setup */
-#define BACKLIGHT_PIN F5
-#define BACKLIGHT_LEVELS 5
+#define BACKLIGHT_PIN B5
+#define BACKLIGHT_LEVELS 6
 //#define BACKLIGHT_BREATHING
 
 /* COL2ROW or ROW2COL */
@@ -76,7 +76,5 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define IS_COMMAND() ( \
   keyboard_report->mods == (MOD_BIT(KC_LSHIFT) | MOD_BIT(KC_RSHIFT)) \
 )
-
-#define TAPPING_TERM 200
 
 #endif
