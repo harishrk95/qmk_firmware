@@ -21,8 +21,7 @@ enum custom_keys{
 // Tap Dance Declarations
 enum tap_dance_actions{
   TD_LAYER = 0,
-  TD_PULSE = 1,
-  TD_SHRUG = 2,
+  TD_SHRUG = 1,
 };
 
 
@@ -32,58 +31,33 @@ enum tap_dance_actions{
 // Tap twice to toggle lighting layer
 // Tap three times to toggle advanced functions layer
 void layers_dance_finished (qk_tap_dance_state_t *state, void *user_data) {
-  uint8_t layer = biton32(layer_state);
-
-  switch(state->count) {
-    case 1:
-      switch(layer) {
-        case _ADVFUNC:
-          layer_off(_ADVFUNC);
-          break;
-        case _FUNCTION:
-          layer_off(_FUNCTION);
-          break;
-        case _LIGHTING:
-          layer_off(_LIGHTING);
-          break;
-        default:
-          layer_on(_FUNCTION);
-          break;
+  if (state->pressed)
+  {
+    layer_on(_FUNCTION);
+  }
+  else
+  {
+    switch (state->count)
+    {
+    case 1: // base layer on
+      if (!state->pressed)
+      {
+        layer_off(_FUNCTION);
+        layer_off(_LIGHTING);
+        layer_off(_ADVFUNC);
       }
       break;
-    case 2:
-      switch(layer) {
-        case _ADVFUNC:
-          layer_off(_ADVFUNC);
-          break;
-        case _FUNCTION:
-          layer_off(_FUNCTION);
-          break;
-        case _LIGHTING:
-          layer_off(_LIGHTING);
-          break;
-        default:
-          layer_on(_LIGHTING);
-          break;
-      }
-    case 3:
-      switch(layer) {
-        case _ADVFUNC:
-          layer_off(_ADVFUNC);
-          break;
-        case _FUNCTION:
-          layer_off(_FUNCTION);
-          break;
-        case _LIGHTING:
-          layer_off(_LIGHTING);
-          break;
-        default:
-          layer_on(_ADVFUNC);
-          break;
-      }
+    case 2: // lighting layer on
+      layer_off(_FUNCTION);
+      layer_on(_LIGHTING);
+      layer_off(_ADVFUNC);
       break;
-    default:
+    case 3: // advanced layer on
+      layer_off(_LIGHTING);
+      layer_off(_FUNCTION);
+      layer_on(_ADVFUNC);
       break;
+    }
   }
 }
 void layers_dance_reset (qk_tap_dance_state_t *state, void *user_data) {
@@ -102,16 +76,6 @@ void layers_dance_reset (qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-
-// Pulse functions
-//
-// Sends a pulse to the backlights
-void pulse_dance_finished(qk_tap_dance_state_t *state, void *user_data) {
-  switch(state->count) {
-    default:
-      break;
-  }
-}
 
 // Shrug functions
 //
@@ -139,7 +103,6 @@ void shrug_dance_reset(qk_tap_dance_state_t *state, void *user_data) {
 // Tap Dance Definitions
 qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED (NULL, layers_dance_finished, layers_dance_reset),
-  [TD_PULSE] = ACTION_TAP_DANCE_FN_ADVANCED (NULL, pulse_dance_finished, NULL),
   [TD_SHRUG] = ACTION_TAP_DANCE_FN_ADVANCED (shrug_dance_each, shrug_dance_finished, shrug_dance_reset),
 };
 
@@ -248,9 +211,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /*
     2: Lighting Layer
     .--------------------------------------------------------------------------------------------------------------------------------------.
-    |        | Back   | Back   | Back   | Back   | Back   |        |        |        |        | Back   |        |        |                 |
-    |        | Light  | Light  | Light  | Light  | Light  |        |        |        |        | Light  | Back   | Back   |                 |
-    |        | 1      | 2      | 3      | 4      | 5      |        |        |        |        | 0      | Light- | Light+ |                 |
+    |        |        |        |        |        |        |        |        |        |        | Back   |        |        |                 |
+    |        |        |        |        |        |        |        |        |        |        | Light  | Back   | Back   |                 |
+    |        |        |        |        |        |        |        |        |        |        | 0      | Light- | Light+ |                 |
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |            |        |        |        |        |        |        |        |        |        |        |        |        |             |
     |            |        |        |        | RGB    | RGB    | RGB    | RGB    |        |        |        |        |        |             |
@@ -266,14 +229,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
-    |          |          |          | Pulse                                                  | Func     |░░░░░░|        |        |        |
+    |          |          |          |                                                        | Func     |░░░░░░|        |        |        |
     '--------------------------------------------------------------------------------------------------------------------------------------'
   */
 
    //--------------------------------------------------------------------------------------------------------------------------------------.
    //        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
    //        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
-     KC_NO,   BL_1,    BL_2,    BL_3,    BL_4,    BL_5,    BL_6,    KC_NO,   KC_NO,   KC_NO,   BL_0,    BL_DEC,  BL_INC,  KC_NO, KC_NO,     
+     KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   BL_0,    BL_DEC,  BL_INC,  KC_NO, KC_NO,     
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
    //            |        |        |        |        |        |        |        |        |        |        |        |        |             |
@@ -289,7 +252,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
-     KC_NO,     KC_NO,     KC_NO,     TD(TD_PULSE),                                            TD(TD_LAYER),KC_NO,KC_NO,  KC_NO,   KC_NO),
+     KC_NO,     KC_NO,     KC_NO,     KC_NO,                                                   TD(TD_LAYER),KC_NO,KC_NO,  KC_NO,   KC_NO),
    //--------------------------------------------------------------------------------------------------------------------------------------'
 
 
@@ -311,7 +274,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
     |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-    | Shift (TD_SHRUG)  |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
+    |                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
     |--------------------------------------------------------------------------------------------------------------------------------------|
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
     |          |          |          |                                                        |          |░░░░░░|        |        |        |
@@ -334,7 +297,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
    //                   |        |        |        |        |        |        |        |        |        |        |░░░░░░|        |░░░░░░░░|
-     TD(TD_SHRUG),KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO,   KC_NO,   
+     KC_NO, KC_NO,       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO,   KC_NO,   
    //--------------------------------------------------------------------------------------------------------------------------------------|
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
    //          |          |          |                                                        |          |░░░░░░|        |        |        |
@@ -342,10 +305,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    //--------------------------------------------------------------------------------------------------------------------------------------'
 
 
-
   [_BLANK] = KEYMAP(
   /*
-    X: Blank Layer
+    X: Blank Layer (copy me to make new layers)
     .--------------------------------------------------------------------------------------------------------------------------------------.
     |        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
     |        |        |        |        |        |        |        |        |        |        |        |        |        |                 |
@@ -398,10 +360,4 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Custom Actions
 const uint16_t PROGMEM fn_actions[] = {
     [0] = ACTION_LAYER_MOMENTARY(_FUNCTION),  // to Function overlay
-};
-
-
-// Loop
-void matrix_scan_user(void) {
-  // Empty
 };
