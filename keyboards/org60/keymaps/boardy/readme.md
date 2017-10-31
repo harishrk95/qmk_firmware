@@ -1,6 +1,6 @@
 # Boardy layout
 
-![Uses this layout](http://i.imgur.com/k3g488o.jpg)
+![Uses this layout](https://i.imgur.com/Az7kZni.png)
 
 This is my custom layout for my board Boardy designed to be used with an [Org60] and custom plate.
 
